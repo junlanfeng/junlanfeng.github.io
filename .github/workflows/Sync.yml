@@ -12,8 +12,14 @@ jobs:
       - name: Checkout 领导的仓库
         uses: actions/checkout@v3
         with:
-          token: ${{ secrets.ACCESS_TOKEN }}  # 用领导的 PAT 签出，确保有写权限
+          token: ${{ secrets.ACCESS_TOKEN }}
           fetch-depth: 0
+
+      # ✅ 新增：配置 Git 用户身份
+      - name: 配置 Git 用户信息
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
 
       - name: 添加你的原始仓库为上游
         run: |
