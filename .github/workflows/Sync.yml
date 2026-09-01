@@ -1,29 +1,30 @@
-name: 'Upstream Sync'
+name: Sync Upstream
 
 on:
   schedule:
-    - cron: '0 7 * * *'  # 定时任务，每天15点执行
-  workflow_dispatch:       # 允许你手动在网页上触发运行
+    - cron: '0 7 * * *'   # UTC 7:00 = 北京时间 15:00
+  workflow_dispatch:
 
 jobs:
-  sync_latest_from_upstream:
+  sync:
     runs-on: ubuntu-latest
-    name: Sync latest commits from upstream repo
-
     steps:
-    - name: Checkout target repo
-      uses: actions/checkout@v3
+      - name: Checkout 领导的仓库
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.ACCESS_TOKEN }}  # 用领导的 PAT 签出，确保有写权限
+          fetch-depth: 0
 
-    - name: Sync upstream changes
-      id: sync
-      uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
-      with:
-        target_sync_branch: main            # 领导的Fork要更新的分支，通常是 main
-        # 这里改用刚设置的 PAT，而不是默认的 GITHUB_TOKEN
-        target_repo_token: ${{ secrets.ACCESS_TOKEN }}
-        upstream_sync_repo: 772960429/junlanfeng  # 改为你的用户名和仓库名
-        upstream_sync_branch: main          # 你的仓库的分支，通常是 main
+      - name: 添加你的原始仓库为上游
+        run: |
+          git remote add upstream https://772960429:${{ secrets.ACCESS_TOKEN }}@github.com/772960429/junlanfeng.git
 
-    - name: New commits found
-      if: steps.sync.outputs.has_new_commits == 'true'
-      run: echo "New commits were found to sync."
+      - name: 拉取并合并你的最新代码
+        run: |
+          git fetch upstream main
+          git checkout main
+          git merge upstream/main --allow-unrelated-histories -m "同步自 772960429/junlanfeng"
+
+      - name: 推送合并后的代码到领导的仓库
+        run: |
+          git push origin main
