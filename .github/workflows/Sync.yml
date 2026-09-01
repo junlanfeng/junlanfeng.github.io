@@ -1,0 +1,28 @@
+name: 'Upstream Sync'
+
+on:
+  schedule:
+    - cron: '0 7 * * *'  # 定时任务，每天15点执行
+  workflow_dispatch:       # 允许你手动在网页上触发运行
+
+jobs:
+  sync_latest_from_upstream:
+    runs-on: ubuntu-latest
+    name: Sync latest commits from upstream repo
+
+    steps:
+    - name: Checkout target repo
+      uses: actions/checkout@v3
+
+    - name: Sync upstream changes
+      id: sync
+      uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
+      with:
+        target_sync_branch: main            # 领导的Fork要更新的分支，通常是 main
+        target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+        upstream_sync_repo: 772960429/junlanfeng  # 改为你的用户名和仓库名
+        upstream_sync_branch: main          # 你的仓库的分支，通常是 main
+
+    - name: New commits found
+      if: steps.sync.outputs.has_new_commits == 'true'
+      run: echo "New commits were found to sync."
