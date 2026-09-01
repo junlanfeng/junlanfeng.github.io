@@ -29,7 +29,7 @@ jobs:
         run: |
           git fetch upstream main
           git checkout main
-          git merge upstream/main --allow-unrelated-histories -m "同步自 772960429/junlanfeng"
+          git merge upstream/main --allow-unrelated-histories -m "同步自 772960429/junlanfeng [skip ci]"
 
       - name: 推送合并后的代码到领导的仓库
         run: |
